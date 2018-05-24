@@ -13,8 +13,9 @@ BIN_DIR="/home/vuls-user/vulsrepo/server"
 RETVAL=0
 
 start() {
-        echo -n $"Starting VulsRepo: " 
-        su ${USER} -c "/usr/bin/nohup ${BIN_DIR}/vulsrepo-server >/dev/null 2>&1 &"
+        echo -n $"Starting VulsRepo: "
+        touch ${BIN_DIR}/vulsrepo.lock
+        su ${USER} -c "/usr/bin/nohup ${BIN_DIR}/vulsrepo-server > /dev/null 2>&1 &"
         RETVAL=$?
         if [ $RETVAL == 0 ]; then
           echo success
@@ -25,9 +26,10 @@ start() {
 }
 
 stop() {
-        echo -n $"Stopping VulsRepo: " 
+        echo -n $"Stopping VulsRepo: "
+        rm -f ${BIN_DIR}/vulsrepo.lock
         /usr/bin/pkill vulsrepo
-        RETVAL=$?
+  RETVAL=$?
         if [ $RETVAL == 0 ]; then
           echo success
         else
@@ -37,8 +39,7 @@ stop() {
 }
 
 status() {
-        if pgrep vulsrepo > /dev/null
-        then
+        if [ -e ${BIN_DIR}/vulsrepo.lock ]; then
           echo -n $"VulsRepo is running: "
         else
           echo -n $"VulsRepo is not running: "
